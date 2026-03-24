@@ -779,7 +779,9 @@ async function generate() {
     }
 
     const data = await res.json();
+    console.log('API raw response:', JSON.stringify(data));
     const rawText = data?.choices?.[0]?.message?.content || '';
+    console.log('rawText:', rawText);
     // Try to extract JSON robustly
     let parsed;
     try {
