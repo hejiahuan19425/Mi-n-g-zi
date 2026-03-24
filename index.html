@@ -763,12 +763,9 @@ async function generate() {
   try {
     const prompt = buildPrompt(chineseName, birthYear, birthMonth, zodiac, hobbies);
 
-    const res = await fetch('https://once.novai.su/v1/chat/completions', {
+    const res = await fetch('/api/proxy', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer sk-rfSEYCPhrmWz5u7qPm5v4DX0jjYYYj15SUGKFGzuSbz6lHlq'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'gemini-3.1-pro-preview',
         max_tokens: 1000,
