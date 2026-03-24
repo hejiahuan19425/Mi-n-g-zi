@@ -780,10 +780,18 @@ async function generate() {
 
     const data = await res.json();
     const rawText = data?.choices?.[0]?.message?.content || '';
-    const clean = rawText.replace(/```json|```/g, '').trim();
+    // Try to extract JSON robustly
     let parsed;
-    try { parsed = JSON.parse(clean); }
-    catch { throw new Error('结果解析失败，请重试'); }
+    try {
+      // Strip markdown code fences
+      let clean = rawText.replace(/```json[\s\S]*?```|```[\s\S]*?```/g, s => s.replace(/```json|```/g, '')).trim();
+      // Find first { ... } block
+      const match = clean.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('no json');
+      parsed = JSON.parse(match[0]);
+    } catch {
+      throw new Error('结果解析失败，请重试');
+    }
 
     incrementUsage();
     renderQuota();
@@ -851,13 +859,16 @@ function hideError() {
 window.addEventListener('DOMContentLoaded', () => {
   renderQuota();
 
-  // Auto zodiac hint on year change
+  // Auto zodiac - update first option label
   document.getElementById('birthYear').addEventListener('input', function() {
     const y = parseInt(this.value);
     const zodiacSel = document.getElementById('zodiac');
-    if (y >= 1920 && y <= 2024 && !zodiacSel.value) {
+    const firstOpt = zodiacSel.options[0];
+    if (y >= 1920 && y <= 2030) {
       const z = calcZodiac(y);
-      zodiacSel.title = `根据 ${y} 年推算：${z}`;
+      firstOpt.text = `自动推算：${z}`;
+    } else {
+      firstOpt.text = '自动推算';
     }
   });
 });
